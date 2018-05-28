@@ -45,7 +45,7 @@ let main _ =
 
     let closingAccount = getCommands
                         |> Seq.choose tryParseCommand
-                        |> Seq.takeWhile ((<>) Exit)
+                        |> Seq.takeWhile (fun x -> x <> Exit)
                         |> Seq.map getAmmount
                         |> Seq.fold processCommand initialAccount
     printfn "%A" closingAccount
