@@ -7,10 +7,21 @@ open Auditing
 open Operations
 open FileRepository
 
+type Command =
+    | Withdraw
+    | Deposit
+    | Exit
+
+
 [<EntryPoint>]
 let main _ =
-    let isValidCommand command = ['w'; 'd'; 'x'] |> List.contains command
-    let isExitCommand = (=) 'x'
+
+    let tryGetCommand c =
+        match c with
+        | 'w' -> (Some Withdraw)
+        | 'd' -> (Some Deposit)
+        | 'x' -> (Some Exit)
+        | _ -> None
     
     let withdrawWithAudit = auditAs 'w' composedLogger withdraw
     let depositWithAudit = auditAs 'd' composedLogger deposit
@@ -22,9 +33,9 @@ let main _ =
         command, Decimal.Parse response
     
     let processCommand account (command, ammount) =
-        if command = 'w' then
+        if command = Withdraw then
             withdrawWithAudit ammount account
-        elif command = 'd' then
+        elif command = Deposit then
             depositWithAudit ammount account
         else account
     let getCommands =
@@ -44,8 +55,8 @@ let main _ =
         |> loadAccount owner
 
     let closingAccount = getCommands
-                        |> Seq.filter isValidCommand
-                        |> Seq.takeWhile (not << isExitCommand)
+                        |> Seq.choose tryGetCommand
+                        |> Seq.takeWhile ((<>) Exit)
                         |> Seq.map getAmmount
                         |> Seq.fold processCommand initialAccount
     printfn "%A" closingAccount
