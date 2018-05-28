@@ -4,6 +4,14 @@ open Capstone3.Domain
 open Domain.Transactions
 open System
 
+module Commands = 
+    let tryParseCommand c =
+        match c with
+        | 'w' -> (Some Withdraw)
+        | 'd' -> (Some Deposit)
+        | 'x' -> (Some Exit)
+        | _ -> None
+
 let openAccount name balance = 
     {
         AccountId = Guid.NewGuid()

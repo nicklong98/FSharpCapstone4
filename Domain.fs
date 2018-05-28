@@ -2,6 +2,11 @@ namespace Capstone3.Domain
 
 open System
 
+type Command =
+    | Withdraw
+    | Deposit
+    | Exit
+
 type Customer = {Name: string}
 type Account = {AccountId: Guid; Balance: decimal; Owner:Customer}
 

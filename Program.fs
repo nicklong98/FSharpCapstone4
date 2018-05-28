@@ -5,23 +5,13 @@ module Capstone3.Program
 open System
 open Auditing
 open Operations
+open Operations.Commands
 open FileRepository
-
-type Command =
-    | Withdraw
-    | Deposit
-    | Exit
+open Capstone3.Domain
 
 
 [<EntryPoint>]
 let main _ =
-
-    let tryGetCommand c =
-        match c with
-        | 'w' -> (Some Withdraw)
-        | 'd' -> (Some Deposit)
-        | 'x' -> (Some Exit)
-        | _ -> None
     
     let withdrawWithAudit = auditAs 'w' composedLogger withdraw
     let depositWithAudit = auditAs 'd' composedLogger deposit
@@ -55,7 +45,7 @@ let main _ =
         |> loadAccount owner
 
     let closingAccount = getCommands
-                        |> Seq.choose tryGetCommand
+                        |> Seq.choose tryParseCommand
                         |> Seq.takeWhile ((<>) Exit)
                         |> Seq.map getAmmount
                         |> Seq.fold processCommand initialAccount
