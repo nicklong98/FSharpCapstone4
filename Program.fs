@@ -1,13 +1,12 @@
 ﻿// Learn more about F# at http://fsharp.org
 
-module Capstone3.Program
+module Capstone4.Program
 
 open System
 open Auditing
 open Operations
-open Operations.Commands
 open FileRepository
-open Capstone3.Domain
+open Capstone4.Domain.Commands
 
 
 [<EntryPoint>]

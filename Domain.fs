@@ -1,14 +1,22 @@
-namespace Capstone3.Domain
+namespace Capstone4.Domain
 
 open System
 
-type Command =
-    | Withdraw
-    | Deposit
-    | Exit
-
 type Customer = {Name: string}
 type Account = {AccountId: Guid; Balance: decimal; Owner:Customer}
+
+module Commands =
+    type Command =
+        | Withdraw
+        | Deposit
+        | Exit
+
+    let tryParseCommand c =
+        match c with
+        | 'w' -> (Some Withdraw)
+        | 'd' -> (Some Deposit)
+        | 'x' -> (Some Exit)
+        | _ -> None
 
 module Transactions =
     type Transaction = {Amount : decimal; Action: char; Successful: bool; Timestamp: DateTime}

@@ -1,16 +1,8 @@
-module Capstone3.Operations
+module Capstone4.Operations
 
-open Capstone3.Domain
+open Capstone4.Domain
 open Domain.Transactions
 open System
-
-module Commands = 
-    let tryParseCommand c =
-        match c with
-        | 'w' -> (Some Withdraw)
-        | 'd' -> (Some Deposit)
-        | 'x' -> (Some Exit)
-        | _ -> None
 
 let openAccount name balance = 
     {
