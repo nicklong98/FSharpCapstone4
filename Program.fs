@@ -33,11 +33,11 @@ let main _ =
         command, Decimal.Parse response
     
     let processCommand account (command, ammount) =
-        if command = Withdraw then
-            withdrawWithAudit ammount account
-        elif command = Deposit then
-            depositWithAudit ammount account
-        else account
+        match command with
+        | Withdraw -> withdrawWithAudit ammount account
+        | Deposit -> depositWithAudit ammount account
+        | Exit -> account
+
     let getCommands =
         seq {
             while true do
