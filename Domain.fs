@@ -6,17 +6,20 @@ type Customer = {Name: string}
 type Account = {AccountId: Guid; Balance: decimal; Owner:Customer}
 
 module Commands =
-    type Command =
-        | Withdraw
-        | Deposit
-        | Exit
+    type BankOperation = Deposit | Withdraw
+    type Command = AccountCommand of BankOperation | Exit
 
     let tryParseCommand c =
         match c with
-        | 'w' -> (Some Withdraw)
-        | 'd' -> (Some Deposit)
-        | 'x' -> (Some Exit)
+        | 'x' -> Some Exit
+        | 'w' -> Some (AccountCommand Withdraw)
+        | 'd' -> Some (AccountCommand Deposit)
         | _ -> None
+
+    let tryGetBankOperation command =
+        match command with
+        | Exit -> None
+        | AccountCommand op -> Some op
 
 module Transactions =
     type Transaction = {Amount : decimal; Action: char; Successful: bool; Timestamp: DateTime}

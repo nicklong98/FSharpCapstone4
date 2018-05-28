@@ -15,17 +15,18 @@ let main _ =
     let withdrawWithAudit = auditAs 'w' composedLogger withdraw
     let depositWithAudit = auditAs 'd' composedLogger deposit
 
-    let getAmmount command =
-        Console.Write "Enter amount: $"
-        let response = Console.ReadLine()
+    let tryGetAmmount command =
         Console.WriteLine()
-        command, Decimal.Parse response
+        Console.Write "Enter amount: $"
+        let amount = Console.ReadLine() |> Decimal.TryParse
+        match amount with
+        | true, amount -> Some(command, amount)
+        | false, _ -> None
     
     let processCommand account (command, ammount) =
         match command with
         | Withdraw -> withdrawWithAudit ammount account
         | Deposit -> depositWithAudit ammount account
-        | Exit -> account
 
     let getCommands =
         seq {
@@ -46,7 +47,8 @@ let main _ =
     let closingAccount = getCommands
                         |> Seq.choose tryParseCommand
                         |> Seq.takeWhile (fun x -> x <> Exit)
-                        |> Seq.map getAmmount
+                        |> Seq.choose tryGetBankOperation
+                        |> Seq.choose tryGetAmmount
                         |> Seq.fold processCommand initialAccount
     printfn "%A" closingAccount
     0 // return an integer exit code
