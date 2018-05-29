@@ -44,7 +44,7 @@ let auditAs operationName audit operation amount account accountId owner =
 
     let transactionSuccessful = updatedAccount <> account
 
-    let transaction = {Amount = amount; Action = operationName; Timestamp = DateTime.UtcNow; Successful = transactionSuccessful}
+    let transaction = {Successful = transactionSuccessful; Amount = amount; Action = operationName; Timestamp = DateTime.UtcNow}
     audit transaction
 
     updatedAccount
@@ -56,7 +56,6 @@ let loadAccount owner (accountId, transactions) =
         else account
     let account = {AccountId = accountId; Balance = 0m; Owner = {Name = owner}}
     transactions 
-    |> Seq.filter (fun t -> t.Successful)
+    |> Seq.filter (fun t-> t.Successful)
     |> Seq.sortBy (fun t -> t.Timestamp)
     |> Seq.fold processTransaction account
-    |> classifyAccount

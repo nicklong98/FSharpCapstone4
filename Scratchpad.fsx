@@ -3,15 +3,15 @@
 #load "FileRepository.fs"
 
 open Capstone4.FileRepository
-open Capstone4.Domain
-open Capstone4.Domain.Transactions
-open Capstone4.Operations
+open System
 
-let auditAs operationName audit operation amount account accountId owner =
-    let audit = audit accountId owner
-    let updatedAccount = operation amount account
+let transactions = tryFindTransactionsOnDisk "nick"
 
-    let transaction = {Amount = amount; Action = operationName; Timestamp = DateTime.UtcNow}
-    audit transaction
+let loadAccountOptional owner = Option.map (Capstone4.Operations.loadAccount owner)
 
-    updatedAccount
+let loadAccount =
+        Console.Write "What is your name: "
+        let owner = Console.ReadLine()
+        owner
+        |> tryFindTransactionsOnDisk
+        |> (loadAccountOptional owner)

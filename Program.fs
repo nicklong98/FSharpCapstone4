@@ -16,7 +16,7 @@ let main _ =
     let withdrawWithAudit = auditAs 'w' composedLogger withdrawSafe
     let depositWithAudit = auditAs 'd' composedLogger deposit
 
-    let tryGetamount command =
+    let tryGetAmmount command =
         Console.WriteLine()
         Console.Write "Enter amount: $"
         let amount = Console.ReadLine() |> Decimal.TryParse
@@ -28,12 +28,12 @@ let main _ =
         let loadAccountOptional owner = Option.map (Capstone4.Operations.loadAccount owner)
         owner |> tryFindTransactionsOnDisk |> (loadAccountOptional owner)
     
-    let processCommand (ratedAccount:RatedAccount) (command, amount) =
-        let accountId = ratedAccount.GetField(fun x -> x.AccountId)
-        let owner = ratedAccount.GetField(fun x-> x.Owner).Name
+    let processCommand (ratedAccount:RatedAccount) (command, ammount) =
+        let accountId = (ratedAccount.GetField(fun x-> x.AccountId))
+        let owner = (ratedAccount.GetField(fun x-> x.Owner)).Name
         match command with
-        | Withdraw -> withdrawWithAudit amount ratedAccount accountId owner
-        | Deposit -> depositWithAudit amount ratedAccount accountId owner
+        | Withdraw -> withdrawWithAudit ammount ratedAccount accountId owner
+        | Deposit -> depositWithAudit ammount ratedAccount accountId owner
 
     let getCommands =
         seq {
@@ -51,15 +51,14 @@ let main _ =
 
         match (tryLoadAccountFromDisk owner) with
         | Some account -> account
-        | None -> openAccount owner 0m |> classifyAccount
-
-    printfn "Opening balance: $%M" (initialAccount.GetField(fun x-> x.Balance))
+        | None -> openAccount owner 0m
+        |> classifyAccount
 
     let closingAccount = getCommands
                         |> Seq.choose tryParseCommand
                         |> Seq.takeWhile (fun x -> x <> Exit)
                         |> Seq.choose tryGetBankOperation
-                        |> Seq.choose tryGetamount
+                        |> Seq.choose tryGetAmmount
                         |> Seq.fold processCommand initialAccount
     printfn "%A" closingAccount
     0 // return an integer exit code

@@ -9,7 +9,7 @@ type CreditAccount = CreditAccount of Account
 type RatedAccount =
     | InCredit of CreditAccount
     | Overdrawn of Account
-    member this.GetField getter =
+    member this.GetField getter = 
         match this with
         | InCredit (CreditAccount account) -> getter account
         | Overdrawn account -> getter account
@@ -31,9 +31,9 @@ module Commands =
         | AccountCommand op -> Some op
 
 module Transactions =
-    type Transaction = {Amount : decimal; Action: char; Timestamp: DateTime; Successful: bool}
+    type Transaction = {Amount : decimal; Action: char; Successful: bool; Timestamp: DateTime}
     let serialize transaction =
-        sprintf "%O***%c***%M**%b"
+        sprintf "%O***%c***%M***%b"
             transaction.Timestamp
             transaction.Action
             transaction.Amount
