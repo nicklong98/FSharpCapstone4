@@ -22,6 +22,10 @@ let main _ =
         match amount with
         | true, amount -> Some(command, amount)
         | false, _ -> None
+
+    let tryLoadAccountFromDisk owner =
+        let loadAccountOptional owner = Option.map (Capstone4.Operations.loadAccount owner)
+        owner |> tryFindTransactionsOnDisk |> (loadAccountOptional owner)
     
     let processCommand account (command, ammount) =
         match command with
@@ -38,11 +42,13 @@ let main _ =
         }
     
     let initialAccount = 
+        let loadAccountOptional owner = Option.map (Capstone4.Operations.loadAccount owner)
         Console.Write "What is your name: "
         let owner = Console.ReadLine()
-        owner
-        |> findTransactionsOnDisk
-        |> loadAccount owner
+
+        match (tryLoadAccountFromDisk owner) with
+        | Some account -> account
+        | None -> openAccount owner 0m
 
     let closingAccount = getCommands
                         |> Seq.choose tryParseCommand

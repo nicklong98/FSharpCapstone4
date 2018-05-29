@@ -1,9 +1,17 @@
+#load "Domain.fs"
+#load "Operations.fs"
+#load "FileRepository.fs"
+
+open Capstone4.FileRepository
 open System
 
-let getAmmount command =
-    Console.WriteLine()
-    Console.Write "Enter amount: $"
-    let amount = Console.ReadLine() |> Decimal.TryParse
-    match amount with
-    | true, amount -> Some(command, amount)
-    | false, _ -> None
+let transactions = tryFindTransactionsOnDisk "nick"
+
+let loadAccountOptional owner = Option.map (Capstone4.Operations.loadAccount owner)
+
+let loadAccount =
+        Console.Write "What is your name: "
+        let owner = Console.ReadLine()
+        owner
+        |> tryFindTransactionsOnDisk
+        |> (loadAccountOptional owner)
