@@ -27,6 +27,9 @@ let withdrawSafe amount ratedAccount =
         printfn "Your account is overdrawn - withdrawl rejected!"
         ratedAccount
 
+let requestBalance (ratedAccount:RatedAccount) =
+    ratedAccount.GetField(fun x-> x.Balance)
+
 let deposit amount account =
     let account =
         match account with
