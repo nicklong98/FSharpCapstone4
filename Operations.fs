@@ -13,25 +13,35 @@ let openAccount name balance =
                 }
     }
 
-let withdraw ammount account =
-    if ammount <= account.Balance then
-        {account with Balance = account.Balance - ammount}
-    else
-        account
+let classifyAccount account = 
+    if account.Balance >= 0M then (InCredit(CreditAccount account))
+    else Overdrawn account
 
-let deposit ammount account =
-    if(ammount >= 0m) then
-        {account with Balance = account.Balance + ammount}
-    else
-        account
+let private withdraw amount (CreditAccount account) =
+    {account with Balance = account.Balance - amount} |> classifyAccount
 
-let auditAs operationName audit operation amount account =
-    let audit = audit account.AccountId account.Owner.Name
+let withdrawSafe amount ratedAccount =
+    match ratedAccount with
+    | InCredit account -> account |> withdraw amount
+    | Overdrawn _ -> 
+        printfn "Your account is overdrawn - withdrawl rejected!"
+        ratedAccount
+
+let deposit amount account =
+    let account =
+        match account with
+        | InCredit (CreditAccount account) -> account
+        | Overdrawn account -> account
+    {account with Balance = account.Balance + amount }
+    |> classifyAccount
+
+let auditAs operationName audit operation amount account accountId owner =
+    let audit = audit accountId owner
     let updatedAccount = operation amount account
 
     let transactionSuccessful = updatedAccount <> account
 
-    let transaction = {Successful = transactionSuccessful; Amount = amount; Action = operationName; Timestamp = DateTime.UtcNow}
+    let transaction = {Amount = amount; Action = operationName; Timestamp = DateTime.UtcNow; Successful = transactionSuccessful}
     audit transaction
 
     updatedAccount
@@ -43,6 +53,7 @@ let loadAccount owner (accountId, transactions) =
         else account
     let account = {AccountId = accountId; Balance = 0m; Owner = {Name = owner}}
     transactions 
-    |> Seq.filter (fun t-> t.Successful)
+    |> Seq.filter (fun t -> t.Successful)
     |> Seq.sortBy (fun t -> t.Timestamp)
     |> Seq.fold processTransaction account
+    |> classifyAccount

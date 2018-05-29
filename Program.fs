@@ -7,15 +7,16 @@ open Auditing
 open Operations
 open FileRepository
 open Capstone4.Domain.Commands
+open Capstone4.Domain
 
 
 [<EntryPoint>]
 let main _ =
     
-    let withdrawWithAudit = auditAs 'w' composedLogger withdraw
+    let withdrawWithAudit = auditAs 'w' composedLogger withdrawSafe
     let depositWithAudit = auditAs 'd' composedLogger deposit
 
-    let tryGetAmmount command =
+    let tryGetamount command =
         Console.WriteLine()
         Console.Write "Enter amount: $"
         let amount = Console.ReadLine() |> Decimal.TryParse
@@ -27,10 +28,12 @@ let main _ =
         let loadAccountOptional owner = Option.map (Capstone4.Operations.loadAccount owner)
         owner |> tryFindTransactionsOnDisk |> (loadAccountOptional owner)
     
-    let processCommand account (command, ammount) =
+    let processCommand (ratedAccount:RatedAccount) (command, amount) =
+        let accountId = ratedAccount.GetField(fun x -> x.AccountId)
+        let owner = ratedAccount.GetField(fun x-> x.Owner).Name
         match command with
-        | Withdraw -> withdrawWithAudit ammount account
-        | Deposit -> depositWithAudit ammount account
+        | Withdraw -> withdrawWithAudit amount ratedAccount accountId owner
+        | Deposit -> depositWithAudit amount ratedAccount accountId owner
 
     let getCommands =
         seq {
@@ -48,13 +51,15 @@ let main _ =
 
         match (tryLoadAccountFromDisk owner) with
         | Some account -> account
-        | None -> openAccount owner 0m
+        | None -> openAccount owner 0m |> classifyAccount
+
+    printfn "Opening balance: $%M" (initialAccount.GetField(fun x-> x.Balance))
 
     let closingAccount = getCommands
                         |> Seq.choose tryParseCommand
                         |> Seq.takeWhile (fun x -> x <> Exit)
                         |> Seq.choose tryGetBankOperation
-                        |> Seq.choose tryGetAmmount
+                        |> Seq.choose tryGetamount
                         |> Seq.fold processCommand initialAccount
     printfn "%A" closingAccount
     0 // return an integer exit code

@@ -23,7 +23,7 @@ let writeTransaction accountId owner transaction =
     let path = buildPath(owner, accountId)
     path |> Directory.CreateDirectory |> ignore
     let filePath = sprintf "%s/%d.txt" path (DateTime.UtcNow.ToFileTimeUtc())
-    File.WriteAllText(filePath, serialized transaction)
+    File.WriteAllText(filePath, serialize transaction)
 
 let tryFindTransactionsOnDisk owner =
     let accountFolder = tryFindAccountFolder owner

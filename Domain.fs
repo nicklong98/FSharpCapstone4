@@ -5,6 +5,15 @@ open System
 type Customer = {Name: string}
 type Account = {AccountId: Guid; Balance: decimal; Owner:Customer}
 
+type CreditAccount = CreditAccount of Account
+type RatedAccount =
+    | InCredit of CreditAccount
+    | Overdrawn of Account
+    member this.GetField getter =
+        match this with
+        | InCredit (CreditAccount account) -> getter account
+        | Overdrawn account -> getter account
+
 module Commands =
     type BankOperation = Deposit | Withdraw
     type Command = AccountCommand of BankOperation | Exit
@@ -22,9 +31,9 @@ module Commands =
         | AccountCommand op -> Some op
 
 module Transactions =
-    type Transaction = {Amount : decimal; Action: char; Successful: bool; Timestamp: DateTime}
-    let serialized transaction =
-        sprintf "%O***%c***%M***%b"
+    type Transaction = {Amount : decimal; Action: char; Timestamp: DateTime; Successful: bool}
+    let serialize transaction =
+        sprintf "%O***%c***%M**%b"
             transaction.Timestamp
             transaction.Action
             transaction.Amount
